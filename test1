@@ -1,0 +1,59 @@
+# Install the necessary libraries using: pip install chatterbot chatterbot_corpus
+
+from chatterbot import ChatBot
+from chatterbot.trainers import ChatterBotCorpusTrainer
+from chatterbot.comparisons import JaccardSimilarity
+from chatterbot.response_selection import get_first_response
+
+# Create a new chatbot
+mental_health_bot = ChatBot('MentalHealthBot')
+
+# Choose a comparison algorithm and set it for the chatbot
+mental_health_bot.set_trainer(ChatterBotCorpusTrainer)
+mental_health_bot.train('chatterbot.corpus.english')
+
+# Define a list of potential mental health issues
+mental_health_issues = ['anxiety', 'depression', 'stress', 'loneliness']
+
+# Create a dictionary to store user information
+user_data = {}
+
+# Function to analyze user input for mental health issues
+def analyze_mental_health(input_text):
+    for issue in mental_health_issues:
+        if issue in input_text.lower():
+            return issue
+    return None
+
+# Function to handle mental health-related queries
+def handle_mental_health_query(query, user_id):
+    # Add more sophisticated logic here based on user history, context, etc.
+    return f"I'm not a substitute for professional help, but I can offer support. It seems you're dealing with {query}. Would you like more information or resources?"
+
+# Main chatbot loop
+while True:
+    user_input = input("You: ")
+    
+    # Check for exit command
+    if user_input.lower() == 'exit':
+        print("MentalHealthBot: Goodbye!")
+        break
+
+    # Get the chatbot's response
+    bot_response = mental_health_bot.get_response(user_input)
+
+    # Analyze user input for mental health issues
+    detected_issue = analyze_mental_health(user_input)
+
+    # Update user data
+    user_id = hash(user_input)  # Replace this with a more robust user identification mechanism
+    if user_id not in user_data:
+        user_data[user_id] = {'history': []}
+    user_data[user_id]['history'].append({'input': user_input, 'response': str(bot_response)})
+
+    # Handle mental health-related queries
+    if detected_issue:
+        mental_health_response = handle_mental_health_query(detected_issue, user_id)
+        print("MentalHealthBot:", mental_health_response)
+    else:
+        print("MentalHealthBot:", bot_response)
